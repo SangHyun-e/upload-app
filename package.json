@@ -4,7 +4,12 @@
   "description": "A file upload and storage application",
   "main": "server.js",
   "scripts": {
-    "test": "test"
+    "dev": "concurrently \"npm run server\" \"npm run start-react\"",
+    "server": "node server.js",
+    "start-react": "cd react-app && npm start",
+    "build": "react-scripts build",
+    "test": "test",
+    "eject": "react-scripts eject"
   },
   "repository": {
     "type": "git",
@@ -23,5 +28,10 @@
   "bugs": {
     "url": "https://github.com/SangHyun-e/upload-app/issues"
   },
-  "homepage": "https://github.com/SangHyun-e/upload-app#readme"
+  "homepage": "https://github.com/SangHyun-e/upload-app#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "react-script": "^2.0.5",
+    "react-scripts": "^5.0.1"
+  }
 }
