@@ -11,6 +11,17 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
+const serverUrl = "http://localhost:3000";
+
+axios
+  .get("http://localhost:3000/api/data")
+  .then((response) => {
+    console.log("서버 응답 데이터:", response.data);
+  })
+  .catch((error) => {
+    console.error("서버 요청 에러:", error);
+  });
+
 class Upload extends Component {
   constructor(props) {
     super(props);
@@ -40,7 +51,6 @@ class Upload extends Component {
 
   // 업로드 버튼 클릭 시, 실행될 함수
   handleUpload = () => {
-    console.log("버튼 클릭");
     const { selectedFiles } = this.state;
     if (selectedFiles.length > 0) {
       // 선택한 파일을 서버로 업로드하는 로직
@@ -51,7 +61,11 @@ class Upload extends Component {
 
       // Axios 사용해서 서버로 파일 업로드 요청
       axios
-        .post("/upload-multiple", formData)
+        .post(`${serverUrl}/upload-multiple`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data", // 파일 업로드 시 반드시 필요한 헤더
+          },
+        })
         .then((response) => {
           console.log("파일 업로드 성공!", response.data);
           // 업로드 완료되면 상태 초기화
