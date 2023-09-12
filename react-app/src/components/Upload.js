@@ -56,7 +56,7 @@ class Upload extends Component {
       // 선택한 파일을 서버로 업로드하는 로직
       const formData = new FormData();
       selectedFiles.forEach((file, index) => {
-        formData.append(`file${index}`, file); // 파일 이름을 file0, file1, ...로 저장
+        formData.append("files", file);
       });
 
       // Axios 사용해서 서버로 파일 업로드 요청
