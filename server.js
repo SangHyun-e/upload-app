@@ -56,15 +56,17 @@ app.post("/upload-multiple", upload.array("files"), (req, res) => {
     originalname: file.originalname,
   }));
 
+  const alias = req.body.alias;
+
   var strL_Q;
   for (const file of files) {
     strL_Q = `
-    insert fileupload..FileStorage (fileName, filePath, uploadDate)
-    values ('${file.Filename}', '${file.path}', getdate())
+    insert fileupload..FileStorage (fileName, filePath, Alias, uploadDate)
+    values ('${file.Filename}', '${file.path}', '${alias}', getdate())
     `;
 
     console.log(
-      `filename: ${file.Filename} file.path : ${file.path} file.originalname : ${file.originalname}`
+      `filename: ${file.Filename} file.path : ${file.path} file.originalname : ${file.originalname} alias : ${alias}`
     );
     var exec = new sql.Request();
     exec.query(strL_Q, (err) => {
