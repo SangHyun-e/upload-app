@@ -29,11 +29,14 @@
 
 import React from "react";
 import Upload from "./components/Upload";
+// import FileList from "./components/FileList";
 
 function App() {
   return (
     <div>
       <Upload /> {/* Upload 컴포넌트만 렌더링 */}
+      {/* <FileList /> */}
+      {/* 파일 목록 컴포넌트 렌더링 */}
     </div>
   );
 }

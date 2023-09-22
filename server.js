@@ -49,89 +49,43 @@ sql.connect(dbConfig, function (err) {
 });
 
 // 파일 업로드 라우트 설정
-app.post("/upload-multiple", upload.array("files"), (req, res) => {
+app.post("/upload-multiple", upload.array("files"), async (req, res) => {
   const files = req.files.map((file) => ({
-    Filename: file.filename,
-    path: `uploads/${file.filename}`, // 파일의 경로를 설정
-    originalname: file.originalname,
+    Filename: decodeURIComponent(file.filename),
+    path: `uploads/${decodeURIComponent(file.filename)}`, // 파일의 경로를 설정
+    originalname: decodeURIComponent(file.originalname),
   }));
+  let aliases = req.body.aliases; // 파일별 별칭을 받아옴
+  console.log(req.body.aliases);
 
-  const alias = req.body.alias;
-
-  var strL_Q;
-  for (const file of files) {
-    strL_Q = `
-    insert fileupload..FileStorage (fileName, filePath, Alias, uploadDate)
-    values ('${file.Filename}', '${file.path}', '${alias}', getdate())
-    `;
-
-    console.log(
-      `filename: ${file.Filename} file.path : ${file.path} file.originalname : ${file.originalname} alias : ${alias}`
-    );
-    var exec = new sql.Request();
-    exec.query(strL_Q, (err) => {
-      if (err) {
-        res.send("에러");
-      } else {
-        res.send("성공");
-      }
-    });
-    return true;
+  if (typeof aliases === "string") {
+    aliases = [aliases];
   }
+
+  // 파일 업로드 및 데이터베이스 저장 비동기 처리
+  (async () => {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const alias = aliases[i] || "";
+
+      var strL_Q = `
+      insert fileupload..FileStorage (fileName, filePath, Alias, uploadDate)
+      values ('${file.Filename}', '${file.path}', '${alias}', getdate())
+      `;
+
+      console.log(
+        `filename: ${file.Filename} file.path : ${file.path} file.originalname : ${file.originalname} alias : ${alias}`
+      );
+      console.log(`${aliases[i]}`);
+      await new sql.Request().query(strL_Q);
+    }
+  })();
+  // 파일 업로드 성공 시 응답
+  res.status(200).send({
+    message: "파일 업로드 성공!",
+  });
 });
 
-// // 데이터베이스 연결 및 파일 정보 저장 함수
-// async function connectToDatabaseAndSaveFiles(files) {
-//   let pool;
-
-//   try {
-//     // 데이터베이스 연결 풀 생성
-//     pool = await sql.connect(dbConfig);
-
-//     // 연결 성공 로그 출력
-//     console.log("MSSQL 연결 성공");
-
-//     // 파일 정보를 데이터베이스에 저장
-//     await saveFilesToDatabase(files, pool);
-
-//     // 데이터베이스 연결 종료
-//     await pool.close();
-//   } catch (error) {
-//     console.error("MSSQL 연결 에러", error);
-//     if (pool) {
-//       pool.close();
-//     }
-//     throw error;
-//   }
-// }
-
-// // 파일 정보를 데이터베이스에 저장하는 함수
-// async function saveFilesToDatabase(files, pools) {
-//   try {
-//     // 파일 정보를 데이터베이스에 저장하는 쿼리 작성
-
-//     const query = `
-//       INSERT INTO fileupload.FileStorage (FileName, FilePath, UploadDate)
-//       VALUES (@FileName, @FilePath, @UploadDate)
-//       `;
-//     var strL_Q;
-
-//     // 파일 정보를 하나씩 데이터베이스에 저장
-//     for (const file of files) {
-//       strL_Q = `
-//       insert fileupload.FileStorage (fileName, filePath, uploadDate)
-//       values ('${file.Filename}', '${file.path}', getdate())
-//       `;
-//       pools.query(query);
-
-//       return true;
-//     }
-//   } catch (error) {
-//     throw error;
-//   }
-// }
-
-// 기존 라우트와 서버 리스닝 코드
 app.get("/", (req, res) => {
   res.send("Hello, Node.js server");
 });
