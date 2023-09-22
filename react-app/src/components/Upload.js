@@ -15,10 +15,13 @@ const serverUrl = "http://localhost:3000";
 
 axios
   .get(`${serverUrl}/api/data`)
+  .get(`${serverUrl}/api/data`)
   .then((response) => {
+    console.log("서버 응답", response.data);
     console.log("서버 응답", response.data);
   })
   .catch((error) => {
+    console.error("요청 에러", error);
     console.error("요청 에러", error);
   });
 
@@ -30,11 +33,23 @@ class Upload extends Component {
       selectedFiles: [], // 선택한 파일 목록
       aliases: [], // 파일 별 별칭 목록
       errorMessage: "", // 오류 메시지
+      selectedFiles: [], // 선택한 파일 목록
+      aliases: [], // 파일 별 별칭 목록
+      errorMessage: "", // 오류 메시지
     };
   }
 
   // 파일 선택 시 실행되는 함수
   handleFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    const { aliases } = this.state;
+    const newAliases = selectedFiles.map(() => "");
+
+    this.setState({
+      selectedFiles,
+      aliases: [...aliases, ...newAliases],
+      errorMessage: "",
+    });
     const selectedFiles = Array.from(e.target.files);
     const { aliases } = this.state;
     const newAliases = selectedFiles.map(() => "");
@@ -53,6 +68,14 @@ class Upload extends Component {
     aliases[index] = e.target.value;
     console.log("별칭 값:", e.target.value);
     this.setState({ aliases });
+
+  // 별칭 입력 시 실행되는 함수
+  handleAliasChange = (e, index) => {
+    console.log("별칭 변경 - 인덱스:", index);
+    const { aliases } = this.state;
+    aliases[index] = e.target.value;
+    console.log("별칭 값:", e.target.value);
+    this.setState({ aliases });
   };
 
   // 파일 삭제 버튼 클릭 시 실행되는 함수
@@ -61,8 +84,15 @@ class Upload extends Component {
     selectedFiles.splice(index, 1); // 해당 파일 제거
     aliases.splice(index, 1); // 해당 파일의 별칭 제거
     this.setState({ selectedFiles, aliases });
+  // 파일 삭제 버튼 클릭 시 실행되는 함수
+  handleFileDelete = (index) => {
+    const { selectedFiles, aliases } = this.state;
+    selectedFiles.splice(index, 1); // 해당 파일 제거
+    aliases.splice(index, 1); // 해당 파일의 별칭 제거
+    this.setState({ selectedFiles, aliases });
   };
 
+  // 업로드 버튼 클릭 시 실행되는 함수
   // 업로드 버튼 클릭 시 실행되는 함수
   handleUpload = () => {
     const { selectedFiles, aliases } = this.state;
@@ -88,6 +118,28 @@ class Upload extends Component {
       formData.append("aliases", aliases[index]);
     });
 
+    axios
+      .post(`${serverUrl}/upload-multiple`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((response) => {
+        console.log("파일 업로드 성공!", response.data);
+
+        // 업로드 성공 시 alert창 표시
+        alert("파일이 성공적으로 업로드 되었습니다.");
+
+        // 업로드 완료 후 상태 초기화
+        this.setState({
+          selectedFiles: [],
+          aliases: [],
+          errorMessage: "",
+        });
+      })
+      .catch((error) => {
+        console.error("파일 업로드 에러", error);
+      });
     axios
       .post(`${serverUrl}/upload-multiple`, formData, {
         headers: {
